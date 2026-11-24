@@ -1,0 +1,24 @@
+name: heartbeat
+on:
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency: heartbeat
+jobs:
+  sign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sign the time
+        env:
+          HEARTBEAT_KEY: ${{ secrets.HEARTBEAT_KEY }}
+        run: node sign.js > heartbeat.txt
+      - name: Publish
+        run: |
+          git config user.name "heartbeat"
+          git config user.email "heartbeat@users.noreply.github.com"
+          git add heartbeat.txt
+          git commit -m "Heartbeat"
+          git push
